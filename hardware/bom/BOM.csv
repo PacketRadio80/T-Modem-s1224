@@ -1,0 +1,41 @@
+Ref,Qty,Description,Preferred_candidate,Notes,Status
+SKT_MODEM,0,16-pin DIP socket 0.3 inch,Generic/turned-pin,DNI softmodem — omit socket,DNI
+U_MODEM,0,Bell-202 AFSK modem IC DIP-16,TCM3105 or MX614P-class,DNI softmodem — Pico PWM/ADC AFSK,DNI
+Y1,0,Crystal chip 1200 flash,4.4336 MHz HC-49 TH,DNI softmodem (rate=FW),DNI
+Y2,0,Crystal chip 2400 flash,6.5536 MHz HC-49 TH,DNI softmodem (rate=FW),DNI
+C_Y1,1,Pierce load OSC1-GND,TH ceramic ~22pF,Keep with single XTAL,TBD
+C_Y2,1,Pierce load OSC2-GND,TH ceramic ~22pF,Keep with single XTAL; do not strip with unused Y2,TBD
+U_XTAL_MUX,0,Crystal mux analog switch,NOT FOR v1.0,Single-XTAL policy; dual/mux abandoned,OUT
+RV_CDL,1,CD level trimmer TH,Commodity,Carrier detect,STOCK
+U1,1,MCU module UF2,Raspberry Pi Pico H,Service controller not softmodem,STOCK
+HDR_PICO_F,2,Female header 1x20 2.54mm,Commodity,Socket Pico H,STOCK
+SW1,1,BOOTSEL tactile N.O. TH,Omron B3F class,BOOTSEL to GND,STOCK
+DSP1,1,16x2 HD44780 LCD green backlight,Commodity,Shared kit,STOCK
+U_LVL,0,BSS138 I2C level shifter,Hobby module,LV=3V3 HV=5V,STOCK
+RV2,1,10k contrast trimmer TH,Commodity,LCD V0,STOCK
+J_DC,1,Barrel 5.5x2.1 centre-positive TH,CUI PJ-002A class,VIN_12 primary,STOCK
+U_REG,1,12V to 5V buck module,Mini560 5V class or MP1584,Headers HDR_REG,STOCK
+HDR_REG,1,Header for buck 2.54mm,Commodity,Plug-in module,STOCK
+D_OR1,1,Schottky buck to +5V TH,1N5819,Keep,STOCK
+D_OR2,0,Schottky USB VBUS to +5V,DNI,No USB board power,DNI
+F1,1,PTC ~0.5A hold,MF-RG500 class,On +5V,STOCK
+C_IN,1,100uF 25V electrolytic,Commodity,VIN_12 bulk,STOCK
+C_BULK,1,100uF 16V electrolytic,Commodity,+5V bulk,STOCK
+C_BYP,8,100nF decoupling TH,Commodity,Decoupling,STOCK
+J_USB,1,USB Type-A receptacle TH,Amphenol/TE/Molex class,Data/flash/command only,STOCK
+J_USB_PICO,1,USB path to Pico,As designed,D+/D-/GND; VBUS isolated,STOCK
+J_AF,1,Screw terminal 4-pin 5.08mm,Phoenix/Wurth/generic,AF_TX AF_RX PTT GND,STOCK
+Q1,1,NPN OC PTT TO-92,2N2222A or BC547,Open collector,STOCK
+R_PTT,1,4.7k 0.25W TH,Commodity,Q1 base,STOCK
+RV1,1,10k TX AF trimmer TH,Commodity,TX level,STOCK
+C_TX,1,AF AC couple,Commodity,TX path,STOCK
+C_RX,1,AF AC couple,Commodity,RX path,STOCK
+LED_PWR,1,3mm LED,Commodity,Power,STOCK
+LED_PTT,1,3mm LED,Commodity,PTT,STOCK
+LED_DCD,1,3mm LED,Commodity,DCD,STOCK
+LED_TXRX,1,3mm LED,Commodity,TX/RX,STOCK
+R_LED1,1,330R-1k LED series,Commodity,,STOCK
+R_LED2,1,330R-1k LED series,Commodity,,STOCK
+R_LED3,1,330R-1k LED series,Commodity,,STOCK
+R_LED4,1,330R-1k LED series,Commodity,,STOCK
+PSU_WALL,1,12V centre-positive wall wart >=0.5A,Commodity,Not on PCB,STOCK

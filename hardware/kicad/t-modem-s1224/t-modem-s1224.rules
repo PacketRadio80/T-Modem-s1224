@@ -1,0 +1,58 @@
+
+(rules PCB t-modem-s1224.dsn
+  (snap_angle 
+    fortyfive_degree
+  )
+  (rule
+    (width 250.0)
+    (clearance 200.0)
+    (clearance 125.0 (type smd_to_turn_gap))
+    (clearance 50.0 (type smd))
+    (clearance 200.0 (type "kicad_default"))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (class default
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    BOOTSEL "AF_TX" "AF_RX" "PTT_OC" GND "VIN_12" "LED_PTT_N" "LED_PTT_A"
+    "USB_VBUS_NC" "USB_DM" "USB_DP" "3V3" "+5V_OR" "I2C_SDA_3V3" "I2C_SDA_5V" "I2C_SCL_3V3"
+    "I2C_SCL_5V" "LED_TXRX_A" "LED_PWR_A" "+5V_REG" "PTT_DRV" "PTT_B" "LED_DCD_N" "LED_TXRX_N"
+    +5V "LED_DCD_A" "LCD_VO"
+    (clearance_class "kicad_default")
+    (via_rule "kicad_default")
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)

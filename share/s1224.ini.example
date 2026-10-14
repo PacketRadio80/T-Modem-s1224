@@ -1,0 +1,27 @@
+# T-Modem-s1224 operator INI example
+# Load via CDC: SET … / SAVE  (or flash defaults in firmware/s1224/config/default.ini)
+#   SET device_id=s1224
+#   SAVE
+# SAVE persists a config blob in the last 4 KiB of Pico flash — not a filesystem.
+# Boot banner is fixed in firmware source (always on CDC) — not an INI key.
+
+[display]
+starting=s1224 is starting
+ready=s1224 is ready
+fault=s1224 is fault
+sending=s1224 is sending
+signal=s1224 signal
+packet=s1224 packet
+power=s1224 power
+idle=s1224 idle
+
+[terminal]
+callsign=
+device_id=s1224
+quiet=1
+
+[sense]
+cdt_active_high=0
+packet_hold_ms=500
+packet_edge_min=4
+packet_window_ms=50
