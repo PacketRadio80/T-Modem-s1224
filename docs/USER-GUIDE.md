@@ -4,6 +4,8 @@
 
 Softmodem sibling of **c1224**: Pico does AFSK (PWM/ADC) + USB **KISS** half-TNC. **No** TCM3105 / socket. Power **12 V**; USB = flash + KISS + ASCII service only.
 
+Complete build + use documentation: [`dok/README.md`](dok/README.md).
+
 ## What you need
 
 - Assembled board with modem IC / socket / crystals **DNI**
@@ -43,7 +45,7 @@ Open `/dev/ttyACM*` → fixed boot banner once → KISS or `HELP`.
 
 ## CDC commands
 
-`HELP` · `STATUS` · `ID` · `PTT ON`/`OFF` · `QUIET`/`VERBOSE` · `INI`/`GET`/`SET`/`SAVE`/`RELOAD`/`DEFAULTS`
+`HELP` · `STATUS` · `ID` · `PTT ON`/`OFF` · `QUIET`/`VERBOSE` · `INI`/`GET`/`SET`/`SAVE`/`RELOAD`/`DEFAULTS` · `BOOTSEL`/`REBOOT`
 
 ## INI · SAVE
 

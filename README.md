@@ -8,6 +8,8 @@ USB KISS half-TNC + softmodem AFSK for Raspberry Pi Pico. No modem chip — all 
 
 **Firmware language:** C · **License:** GPLv3 · **Platform:** RP2040 (Raspberry Pi Pico)
 
+**Docs:** [`docs/dok/README.md`](docs/dok/README.md) — complete documentation (build · flash · commission · operate · host · troubleshooting).
+
 ## Firmware Images
 
 Pre-built UF2 files in `firmware/s1224/bin/`:
@@ -48,6 +50,8 @@ Each baud rate requires a **separate firmware image** — no runtime switching.
 picotool load firmware/s1224/bin/s1224-2400.uf2 -x
 ```
 
+**Unattended (CLI):** send `BOOTSEL` (or `DFU`) to enter the UF2 bootloader, `REBOOT` to restart. Opening the port at **1200 baud** and dropping **DTR** also enters the bootloader (classic 1200bps touch).
+
 ### Build from Source
 
 ```bash
@@ -81,6 +85,8 @@ make -j$(nproc)
 | `SAVE` | Persist config to flash |
 | `RELOAD` | Reload config from flash |
 | `DEFAULTS` | Reset to factory defaults |
+| `BOOTSEL` / `DFU` | Enter UF2 bootloader (unattended flash) |
+| `REBOOT` | Restart the firmware |
 
 ## Hardware
 

@@ -2,6 +2,7 @@
 
 | Doc | Role |
 |-----|------|
+| [`dok/README.md`](dok/README.md) | Complete documentation — build · flash · commission · operate · host · troubleshooting |
 | [`USER-GUIDE.md`](USER-GUIDE.md) | Anyone — what it is · assemble · flash · terminals · SAVE |
 | [`../README.md`](../README.md) | Product overview |
 | [`../firmware/s1224/README.md`](../firmware/s1224/README.md) | Pico softmodem FW |

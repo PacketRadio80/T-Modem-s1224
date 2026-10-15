@@ -41,6 +41,8 @@ Rebuild separately for each bitrate (clean build dir or out-of-tree dirs recomme
 2. Copy `s1224-*.uf2` to RPI-RP2 (or `picotool load -f …`).
 3. Host opens `/dev/ttyACM*` (USB CDC).
 
+**Unattended:** CLI `BOOTSEL`/`DFU` enters the bootloader · `REBOOT` restarts · 1200bps DTR-drop touches the bootloader too.
+
 ## Any KISS terminal (standalone — no MAX25)
 
 **MAX25-Stack is not required.** **All terminals should work insofar as applicable** — flash UF2 → plug USB → open `/dev/ttyACM*` → KISS `0xC0` or ASCII `HELP`.
@@ -77,6 +79,8 @@ Fixed source text in `src/common/banner.c` / `include/version.h`. **Always** pri
 | `PTT ON` / `PTT OFF` | Key GP9 |
 | `QUIET ON` / `OFF` | Suppress extra unsolicited CDC ASCII |
 | `INI` / `GET` / `SET` / `SAVE` / `RELOAD` / `DEFAULTS` | Config |
+| `BOOTSEL` / `DFU` | Enter UF2 bootloader (unattended flash) |
+| `REBOOT` | Restart the firmware |
 
 **`SAVE`:** writes a config **blob** into the **last 4 KiB** of Pico flash — **not** a filesystem.
 
