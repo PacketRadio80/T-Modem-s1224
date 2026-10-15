@@ -97,6 +97,8 @@ void afsk_soft_init(void)
 {
     g_prof = afsk_profile_get();
     gpio_set_function(PIN_AF_TX, GPIO_FUNC_PWM);
+    gpio_set_drive_strength(PIN_AF_TX, GPIO_DRIVE_STRENGTH_12MA);
+    gpio_set_slew_rate(PIN_AF_TX, GPIO_SLEW_RATE_FAST);
     g_pwm_slice = pwm_gpio_to_slice_num(PIN_AF_TX);
     g_pwm_chan = pwm_gpio_to_channel(PIN_AF_TX);
     pwm_tone_hz(0);

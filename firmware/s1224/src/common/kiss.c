@@ -30,7 +30,7 @@ bool kiss_rx_byte(kiss_rx_t *kx, uint8_t b, uint8_t *out, size_t *out_len)
         }
         kx->len = 0;
         kx->esc = false;
-        kx->in_frame = false;
+        kx->in_frame = true;
         return false;
     }
     if (!kx->in_frame) {
