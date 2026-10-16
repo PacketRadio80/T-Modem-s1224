@@ -51,6 +51,7 @@ Rebuild separately for each bitrate (clean build dir or out-of-tree dirs recomme
 |------|--------|
 | Device | `/dev/ttyACM*` |
 | Framing | Raw **8N1** · binary **KISS** (`0xC0` … `0xC0`) · DATA cmd `0x00` |
+| Params | `TXDELAY` / `TXTAIL` apply · `SLOTTIME` / `PERSIST` / `FULLDUP` ignored with notice |
 | Boot | Fixed source banner **always** once · `quiet=1` damps extra STATUS/CONFIG ASCII only |
 
 ## Pins
@@ -77,6 +78,7 @@ Fixed source text in `src/common/banner.c` / `include/version.h`. **Always** pri
 | `STATUS` | state, PTT, signal, packet, carrier, bitrate |
 | `ID` | `device_id` / `callsign` / bitrate / quiet |
 | `PTT ON` / `PTT OFF` | Key GP9 |
+| `TONE <hz> <ms>` | Pure sine on AF_TX with PTT — analog path / hum test |
 | `QUIET ON` / `OFF` | Suppress extra unsolicited CDC ASCII |
 | `INI` / `GET` / `SET` / `SAVE` / `RELOAD` / `DEFAULTS` | Config |
 | `BOOTSEL` / `DFU` | Enter UF2 bootloader (unattended flash) |
@@ -91,6 +93,15 @@ Fixed source text in `src/common/banner.c` / `include/version.h`. **Always** pri
 | `callsign` | empty | Operator call / station string for `ID` |
 | `device_id` | `s1224` | Short device mark |
 | `quiet` | `1` | Suppress extra unsolicited CDC ASCII (not boot banner) |
+
+## INI (`[modem]`)
+
+| Key | Default | Role |
+|-----|---------|------|
+| `tx_delay_ms` | `500` | PTT key-up before the first data bit (KISS `TXDELAY` × 10 ms) |
+| `txtail_ms` | `100` | Tail after the last data bit before PTT off (KISS `TXTAIL` × 10 ms) |
+| `rx_gate` | `1` | Drop RX frames while `sense_signal_active()` is false |
+| `carrier_thresh_x10` | `50` | Goertzel power threshold for carrier detect (×10) |
 
 See [`share/s1224.ini.example`](../../share/s1224.ini.example).
 

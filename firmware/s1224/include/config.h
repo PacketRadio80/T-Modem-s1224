@@ -30,6 +30,12 @@ typedef struct {
     uint16_t packet_hold_ms;
     uint16_t packet_edge_min;
     uint16_t packet_window_ms;
+    /* TX timing (KISS TXDELAY/TXTAIL, milliseconds) */
+    uint16_t tx_delay_ms;      /* PTT keyup before the first data bit   */
+    uint16_t txtail_ms;        /* tail after the last data bit, PTT off */
+    /* RX analysis */
+    bool rx_gate;              /* true = drop RX frames without sense   */
+    uint16_t carrier_thresh_x10; /* Goertzel power threshold, x10       */
 } s1224_config_t;
 
 void config_init(void);

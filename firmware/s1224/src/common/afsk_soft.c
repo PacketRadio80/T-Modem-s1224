@@ -5,6 +5,7 @@
  */
 #include "afsk_soft.h"
 #include "afsk_profile.h"
+#include "config.h"
 #include "hdlc.h"
 #include "board_pins.h"
 #include "ptt.h"
@@ -12,7 +13,9 @@
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
+#include "hardware/watchdog.h"
 #include "pico/stdlib.h"
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 
@@ -21,7 +24,6 @@
 #define PWM_CLKDIV       4.0f
 #define RX_SAMPLES_BIT   8
 #define RX_FS_HZ         ((unsigned)S1224_BITRATE * RX_SAMPLES_BIT)
-#define CARRIER_THRESH   50.0f
 
 static uint8_t g_tx_bits[TX_BITS_MAX];
 static volatile bool g_tx_busy;
@@ -33,6 +35,8 @@ static uint g_pwm_slice;
 static uint g_pwm_chan;
 static afsk_profile_t g_prof;
 static bool g_carrier;
+static float g_dbg_mag_m;
+static float g_dbg_mag_s;
 
 #if PIN_AF_RX_ADC >= 0
 #include "hardware/adc.h"
@@ -64,13 +68,16 @@ static void pwm_tone_hz(uint32_t freq_hz)
     pwm_set_enabled(g_pwm_slice, true);
 }
 
-static void nrzi_play_bit(bool data_bit)
+/** sleep_ms that feeds the watchdog in 100 ms slices — tx_delay/txtail
+ *  are operator-configurable up to 65 s, the watchdog resets at 8 s. */
+static void sleep_ms_wd(uint32_t ms)
 {
-    if (!data_bit) {
-        g_nrzi_mark = !g_nrzi_mark;
+    while (ms > 0u) {
+        uint32_t slice = ms > 100u ? 100u : ms;
+        sleep_ms(slice);
+        watchdog_update();
+        ms -= slice;
     }
-    pwm_tone_hz(g_nrzi_mark ? g_prof.mark_hz : g_prof.space_hz);
-    busy_wait_us_32(BIT_US);
 }
 
 #if RX_GOERTZEL_ENABLE
@@ -140,6 +147,48 @@ void afsk_rx_set_callback(afsk_rx_frame_fn fn)
     g_rx_cb = fn;
 }
 
+void afsk_rx_debug_mags(float *mark_p, float *space_p)
+{
+    if (mark_p) {
+        *mark_p = g_dbg_mag_m;
+    }
+    if (space_p) {
+        *space_p = g_dbg_mag_s;
+    }
+}
+
+bool afsk_tx_tone(uint32_t freq_hz, uint32_t duration_ms)
+{
+    if (g_tx_busy) {
+        return false;
+    }
+    if (duration_ms == 0 || duration_ms > 60000u) {
+        return false;
+    }
+    if (freq_hz < 100 || freq_hz > 20000u) {
+        /* Reject obviously bogus values — the PWM CLKDIV calc needs a
+         * sane range, and 100..20000 covers both 1200-Bd and 2400-Bd
+         * tone profiles with headroom for A/B test tones. */
+        return false;
+    }
+    g_tx_busy = true;
+    status_set(S1224_STATE_SENDING);
+    status_publish();
+    ptt_set(true);
+    sleep_ms_wd(20);  /* settle: let the radio's TX-AGC stabilise */
+    pwm_tone_hz(freq_hz);
+    sleep_ms_wd(duration_ms);
+    pwm_tone_hz(0);
+    ptt_set(false);
+    status_set(S1224_STATE_READY);
+    status_publish();
+    g_tx_busy = false;
+    if (config_unsolicited_ok()) {
+        printf("TONE hz=%u ms=%u\r\n", (unsigned)freq_hz, (unsigned)duration_ms);
+    }
+    return true;
+}
+
 bool afsk_tx_frame(const uint8_t *info, size_t info_len)
 {
     if (g_tx_busy || !info || info_len == 0 || info_len > HDLC_MAX_INFO) {
@@ -150,35 +199,65 @@ bool afsk_tx_frame(const uint8_t *info, size_t info_len)
         return false;
     }
 
+    const s1224_config_t *cfg = config_get();
     g_tx_busy = true;
     status_set(S1224_STATE_SENDING);
     status_publish();
     ptt_set(true);
-    sleep_ms(40);
+    sleep_ms_wd(cfg->tx_delay_ms);
 
     g_nrzi_mark = true;
-    pwm_tone_hz(g_prof.mark_hz);
+    uint32_t last_tone = g_prof.mark_hz;
+    pwm_tone_hz(last_tone);
 
+    absolute_time_t tbit = get_absolute_time();
+    unsigned bits_since_wd = 0;
     for (size_t i = 0; i < nbits; i++) {
-        nrzi_play_bit(g_tx_bits[i] != 0);
+        if (g_tx_bits[i] == 0) {
+            g_nrzi_mark = !g_nrzi_mark;
+        }
+        uint32_t tone = g_nrzi_mark ? g_prof.mark_hz : g_prof.space_hz;
+        if (tone != last_tone) {
+            pwm_tone_hz(tone);
+            last_tone = tone;
+        }
+        tbit = delayed_by_us(tbit, BIT_US);
+        busy_wait_until(tbit);
+        if (++bits_since_wd >= 256u) {
+            /* The TX loop is bit-banged and tight — no sleep_ms() to
+             * share. 256 bits at 1200 Bd = 213 ms, well under the 8 s
+             * watchdog. 256 bits at 300 Bd = 853 ms, still safe. */
+            watchdog_update();
+            bits_since_wd = 0;
+        }
     }
 
     pwm_tone_hz(0);
-    sleep_ms(20);
+    sleep_ms_wd(cfg->txtail_ms);
     ptt_set(false);
     status_set(S1224_STATE_READY);
     status_publish();
     g_tx_busy = false;
+
+    if (config_unsolicited_ok()) {
+        printf("TX info bits=%u air_ms=%u delay_ms=%u tail_ms=%u "
+               "mark=%u space=%u\r\n",
+               (unsigned)nbits,
+               (unsigned)((uint64_t)nbits * BIT_US / 1000u),
+               (unsigned)cfg->tx_delay_ms, (unsigned)cfg->txtail_ms,
+               (unsigned)g_prof.mark_hz, (unsigned)g_prof.space_hz);
+    }
     return true;
 }
-
 #if RX_GOERTZEL_ENABLE
 static void rx_process_bit_window(void)
 {
     float m = goertzel_mag(g_rx_samp, RX_SAMPLES_BIT, g_coeff_mark);
     float s = goertzel_mag(g_rx_samp, RX_SAMPLES_BIT, g_coeff_space);
     float peak = m > s ? m : s;
-    g_carrier = peak > CARRIER_THRESH;
+    g_dbg_mag_m = m;
+    g_dbg_mag_s = s;
+    g_carrier = peak > (float)config_get()->carrier_thresh_x10 / 10.0f;
 
     bool tone_mark = (m >= s);
     bool data_bit = (tone_mark == g_rx_nrzi_mark); /* NRZI: 1 = no transition */
