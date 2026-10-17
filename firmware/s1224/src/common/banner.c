@@ -52,33 +52,58 @@ static size_t banner_cols(const char *s)
     return cols;
 }
 
-static void banner_line(const char *text)
+/* Boxed banner helpers. Pure ASCII ('+' '-' '|'), spaces only (no TAB),
+ * fixed BANNER_WIDTH columns so CDC terminals and log parsers align. */
+static void banner_rule(void)
 {
-    size_t cols = banner_cols(text);
-    size_t pad = 0;
-    if (cols < BANNER_WIDTH) {
-        pad = (BANNER_WIDTH - cols) / 2u;
+    watchdog_update();
+    putchar('+');
+    for (size_t i = 0; i < BANNER_WIDTH - 2u; i++) {
+        putchar('-');
     }
+    putchar('+');
+    fputs("\r\n", stdout);
+}
+
+static void banner_boxline(const char *text)
+{
+    size_t inner = BANNER_WIDTH - 2u;
+    size_t cols = banner_cols(text);
+    if (cols > inner) {
+        cols = inner;
+    }
+    size_t pad = (inner - cols) / 2u;
+    watchdog_update();
+    putchar('|');
     for (size_t i = 0; i < pad; i++) {
-        watchdog_update();
         putchar(' ');
     }
     fputs(text, stdout);
+    for (size_t i = cols + pad; i < inner; i++) {
+        putchar(' ');
+    }
+    putchar('|');
     fputs("\r\n", stdout);
 }
 
 void banner_print(void)
 {
-    /* Fixed boot banner — edit source only */
+    /* Fixed boot banner - edit source only. Identical across T-Modem
+     * firmwares (c1224 chip modem + s1224 softmodem); only the runtime
+     * AFSK rate differs per build. */
     char line[BANNER_WIDTH + 8];
 
-    snprintf(line, sizeof(line), "T-Modem-s1224 %s", S1224_FW_VERSION);
-    banner_line(line);
+    banner_rule();
 
-    snprintf(line, sizeof(line), "USB KISS Half-TNC · AFSK %u",
+    snprintf(line, sizeof(line), "T-Modem Firmware v%s", S1224_FW_VERSION);
+    banner_boxline(line);
+
+    snprintf(line, sizeof(line), "USB KISS Half-TNC - AFSK %u",
              (unsigned)afsk_bitrate());
-    banner_line(line);
+    banner_boxline(line);
 
-    banner_line("Non-Profit · GNU GPLv3 · AS-IS");
-    banner_line("https://github.com/ngteq");
+    banner_boxline("Packet Radio | GNU GPLv3 | AS-IS");
+    banner_boxline("github.com/PacketRadio80");
+
+    banner_rule();
 }

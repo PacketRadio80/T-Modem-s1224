@@ -27,6 +27,7 @@ static unsigned g_len;
 static kiss_rx_t g_kiss;
 static uint8_t g_kiss_payload[KISS_MAX_PAYLOAD];
 static bool g_baud1200;
+static uint64_t g_last_rx_us;
 
 static void trim_copy_upper_cmd(char *dst, size_t dstsz, const char *src)
 {
@@ -313,8 +314,11 @@ static void kiss_param_apply(uint8_t cmd, uint8_t val)
 void usb_cmd_poll(void)
 {
     int c;
+    bool got_byte = false;
     while ((c = getchar_timeout_us(0)) != PICO_ERROR_TIMEOUT) {
         uint8_t b = (uint8_t)c;
+        got_byte = true;
+        g_last_rx_us = time_us_64();
 
         /* KISS path: FEND or mid-frame */
         if (b == KISS_FEND || g_kiss.in_frame) {
@@ -349,6 +353,11 @@ void usb_cmd_poll(void)
         if (g_len + 1 < LINE_MAX && c >= 32 && c < 127) {
             g_line[g_len++] = (char)c;
         }
+    }
+    if (!got_byte && g_kiss.in_frame && g_len == 0 &&
+        g_last_rx_us != 0 && (time_us_64() - g_last_rx_us) > 100000u) {
+        kiss_rx_init(&g_kiss);
+        g_last_rx_us = 0;
     }
 }
 

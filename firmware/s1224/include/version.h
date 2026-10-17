@@ -5,5 +5,5 @@
  * Matches product tag style without leading 'v' (tag: v1.0-prototype).
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-#define S1224_FW_VERSION "1.0-prototype"
+#define S1224_FW_VERSION "1.0"
 #endif
