@@ -96,6 +96,7 @@ make -j$(nproc)
 - **AF in:** GP26 (ADC Goertzel input)
 - **PTT:** GP9 → optocoupler → radio PTT input
 - **Display:** I2C HD44780 via PCF8574 backpack (optional)
+- **Missing component (nachrüstbar):** the TX AF output buffer is not populated on the shared AF stage. **Retrofit (Lösung 1):** unity-gain op-amp buffer between the AF source and `RV1` — improves TX audio (required on the c1224's weak TCM3105 `TXA`; optional here since GP6 PWM is a stronger driver).
 
 ## Architecture
 
